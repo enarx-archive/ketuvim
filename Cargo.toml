@@ -1,0 +1,9 @@
+[package]
+name = "ketuvim"
+version = "0.1.0"
+authors = ["Nathaniel McCallum <npmccallum@redhat.com>"]
+edition = "2018"
+
+[dependencies]
+flagset = "0.1.0"
+libc = "0.2.50"
