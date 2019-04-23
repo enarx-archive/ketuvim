@@ -16,7 +16,7 @@ impl VirtualCpu {
         let fd = unsafe { Fd::from_raw_fd(fd as c_int) };
 
         let run = map::Map::build(map::Access::Shared)
-            .protection(map::Protection::Read | map::Protection::Write)
+            .protection(map::Protection::READ | map::Protection::WRITE)
             .extra(vm.vcpu_mmap_size - size_of::<run::Run>())
             .file(&fd, 0)
             .done()?;

@@ -11,7 +11,17 @@ use std::os::raw::c_uint;
 
 use crate::util::{fd, map};
 
+use bitflags::bitflags;
+
 pub struct Kvm(fd::Fd);
+
+bitflags! {
+    #[derive(Default)]
+    pub struct MemoryFlags: u32 {
+        const LOG_DIRTY_PAGES = 1 << 0;
+        const READ_ONLY = 1 << 1;
+    }
+}
 
 pub struct VirtualMachine {
     fd: fd::Fd,

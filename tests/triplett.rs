@@ -1,4 +1,3 @@
-use flagset::FlagSet;
 use ketuvim::*;
 
 const CODE: &[u8] = &[
@@ -16,8 +15,8 @@ fn test() {
 
     // Create the code mapping.
     let mut code = util::map::Map::<()>::build(util::map::Access::Shared)
-        .protection(util::map::Protection::Read | util::map::Protection::Write)
-        .flags(util::map::Flags::Anonymous)
+        .protection(util::map::Protection::READ | util::map::Protection::WRITE)
+        .flags(util::map::Flags::ANONYMOUS)
         .extra(0x1000)
         .done().unwrap();
 
@@ -25,7 +24,7 @@ fn test() {
     code[..CODE.len()].copy_from_slice(CODE);
 
     // Add the mapping to the VM.
-    vm.add_region(0, FlagSet::default(), 0x1000, code).unwrap();
+    vm.add_region(0, MemoryFlags::default(), 0x1000, code).unwrap();
 
     // Setup special registers.
     let mut sregs = cpu.special_registers().unwrap();

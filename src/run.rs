@@ -1,4 +1,4 @@
-use flagset::{FlagSet, flags};
+use bitflags::bitflags;
 use crate::arch;
 
 #[repr(C)]
@@ -13,7 +13,7 @@ pub struct Run {
     pub exit_reason: ReasonCode,
     pub ready_for_interrupt_injection: bool,
     pub if_flag: u8,
-    pub flags: FlagSet<arch::RunFlags>,
+    pub flags: arch::RunFlags,
 
     // In (Pre-KVM-Run), Out (Post-KVM-Run)
     pub cr8: u64,
@@ -85,7 +85,7 @@ pub union ReasonData {
     pub hypercall: ReasonHypercall,
     pub tpr_access: ReasonTprAccess,
     pub s390_sieic: ReasonS390Sieic,
-    pub s390_reset_flags: FlagSet<ReasonS390ResetFlags>,
+    pub s390_reset_flags: ReasonS390ResetFlags,
     pub s390_ucontrol: ReasonS390Ucontrol,
     pub dcr: ReasonDcr,
     pub internal: ReasonInternalError,
@@ -173,13 +173,13 @@ pub struct ReasonS390Sieic {
     pub ipb: u32,
 }
 
-flags! {
-    pub enum ReasonS390ResetFlags: u64 {
-        Por = 1,
-        Clear = 2,
-        Subsystem = 4,
-        CpuInit = 8,
-        Ipl = 16,
+bitflags! {
+    pub struct ReasonS390ResetFlags: u64 {
+        const POR = 1 << 0;
+        const CLEAR = 1 << 1;
+        const SUBSYSTEM = 1 << 2;
+        const CPU_INIT = 1 << 3;
+        const IPL = 1 << 4;
     }
 }
 

@@ -1,4 +1,4 @@
-use flagset::{FlagSet, flags};
+use bitflags::bitflags;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
@@ -141,8 +141,8 @@ pub struct DebugExit {
     pub dr7: u64,
 }
 
-flags! {
-    pub enum RunFlags: u16 {
-        Smm
+bitflags! {
+    pub struct RunFlags: u16 {
+        const SMM = 1 << 0;
     }
 }

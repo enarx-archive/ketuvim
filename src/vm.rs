@@ -5,20 +5,11 @@ use std::os::raw::{c_int, c_uint, c_ulong};
 use std::os::unix::io::FromRawFd;
 use std::io::{ErrorKind, Result};
 
-use flagset::{flags, FlagSet};
-
-flags! {
-    pub enum MemoryFlags: u32 {
-        LogDirtyPages,
-        ReadOnly,
-    }
-}
-
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 struct Region {
     slot: u32,
-    flags: FlagSet<MemoryFlags>,
+    flags: MemoryFlags,
     guest_phys_addr: u64,
     memory_size: u64,
     userspace_addr: u64,
@@ -50,7 +41,7 @@ impl VirtualMachine {
     pub fn add_region<T: 'static + Copy>(
         &mut self,
         space: u16,
-        flags: impl Into<FlagSet<MemoryFlags>>,
+        flags: MemoryFlags,
         addr: u64,
         mut map: Map<T>
     ) -> Result<u16> {

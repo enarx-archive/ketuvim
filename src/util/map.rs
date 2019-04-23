@@ -7,22 +7,26 @@ use std::marker::PhantomData;
 use std::io::{Error, Result};
 use std::mem::size_of;
 
-use flagset::{flags, FlagSet};
+use bitflags::bitflags;
 
 pub enum Access {
     Shared,
     Private,
 }
 
-flags! {
-    pub enum Protection: c_int {
-        Read = libc::PROT_READ,
-        Write = libc::PROT_WRITE,
-        Execute = libc::PROT_EXEC,
+bitflags! {
+    #[derive(Default)]
+    pub struct Protection: c_int {
+        const READ = libc::PROT_READ;
+        const WRITE = libc::PROT_WRITE;
+        const EXECUTE = libc::PROT_EXEC;
     }
+}
 
-    pub enum Flags: c_int {
-        Anonymous = libc::MAP_ANONYMOUS,
+bitflags! {
+    #[derive(Default)]
+    pub struct Flags: c_int {
+        const ANONYMOUS = libc::MAP_ANONYMOUS;
     }
 }
 
@@ -30,9 +34,9 @@ pub struct Builder<T: 'static + Copy> {
     phantom: PhantomData<T>,
     addr: libc::uintptr_t,
     extra: usize,
-    prot: FlagSet<Protection>,
+    prot: Protection,
     access: Access,
-    flags: FlagSet<Flags>,
+    flags: Flags,
     fd: RawFd,
     offset: libc::off_t,
 }
@@ -111,8 +115,8 @@ impl<T: 'static + Copy> Map<T> {
             access,
             offset: 0,
             extra: 0,
-            flags: FlagSet::default(),
-            prot: FlagSet::default(),
+            flags: Flags::default(),
+            prot: Protection::default(),
             addr: 0, // NULL
             fd: -1,
         }
@@ -127,8 +131,8 @@ impl<T: 'static + Copy> Map<T> {
 
 impl<T: 'static + Copy> Builder<T> {
     #[inline]
-    pub fn protection(mut self, prot: impl Into<FlagSet<Protection>>) -> Self {
-        self.prot = prot.into();
+    pub fn protection(mut self, prot: Protection) -> Self {
+        self.prot = prot;
         self
     }
 
@@ -139,8 +143,8 @@ impl<T: 'static + Copy> Builder<T> {
     }
 
     #[inline]
-    pub fn flags(mut self, flags: impl Into<FlagSet<Flags>>) -> Self {
-        self.flags = flags.into();
+    pub fn flags(mut self, flags: Flags) -> Self {
+        self.flags = flags;
         self
     }
 
