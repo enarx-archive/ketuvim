@@ -25,24 +25,26 @@ struct Region {
 }
 
 impl VirtualMachine {
-    pub fn new(kvm: &Arc<RwLock<Kvm>>) -> Result<Arc<RwLock<Self>>> {
+    pub fn new(kvm: &Kvm) -> Result<Self> {
         const KVM_CAP_MULTI_ADDRESS_SPACE: c_int = 118;
+        const KVM_GET_VCPU_MMAP_SIZE: c_ulong = 44548;
         const KVM_CHECK_EXTENSION: c_ulong = 44547;
         const KVM_CREATE_VM: c_ulong = 44545;
 
-        let (fd, limit) = unsafe {
-            let fd = kvm.read().unwrap().fd.ioctl(KVM_CREATE_VM, 0 as c_ulong)?;
+        let (fd, limit, size) = unsafe {
+            let fd = kvm.0.ioctl(KVM_CREATE_VM, 0 as c_ulong)?;
             let fd = fd::Fd::from_raw_fd(fd as c_int);
             let lim = fd.ioctl(KVM_CHECK_EXTENSION, KVM_CAP_MULTI_ADDRESS_SPACE)?;
-            (fd, lim)
+            let size = kvm.0.ioctl(KVM_GET_VCPU_MMAP_SIZE, ())?;
+            (fd, lim, size as usize)
         };
 
-        Ok(Arc::new(RwLock::new(Self {
+        Ok(Self {
             multi_addr_space: limit,
+            vcpu_mmap_size: size,
             mem: HashMap::new(),
-            kvm: kvm.clone(),
             fd
-        })))
+        })
     }
 
     pub fn add_region<T: 'static + Copy>(

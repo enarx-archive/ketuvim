@@ -9,26 +9,19 @@ use std::mem::size_of;
 use std::io::Result;
 
 impl VirtualCpu {
-    pub fn new(vm: &Arc<RwLock<VirtualMachine>>) -> Result<Arc<RwLock<Self>>> {
-        const KVM_GET_VCPU_MMAP_SIZE: c_ulong = 44548;
+    pub fn new(vm: &VirtualMachine) -> Result<Self> {
         const KVM_CREATE_VCPU: c_ulong = 44609;
 
-        let fd = unsafe { vm.read().unwrap().fd.ioctl(KVM_CREATE_VCPU, 0 as c_ulong)? };
+        let fd = unsafe { vm.fd.ioctl(KVM_CREATE_VCPU, 0 as c_ulong)? };
         let fd = unsafe { Fd::from_raw_fd(fd as c_int) };
-
-        let size = unsafe {
-            vm.read().unwrap()
-                .kvm.read().unwrap()
-                .fd.ioctl(KVM_GET_VCPU_MMAP_SIZE, ())?
-        };
 
         let run = map::Map::build(map::Access::Shared)
             .protection(map::Protection::Read | map::Protection::Write)
-            .extra(size as usize - size_of::<run::Run>())
+            .extra(vm.vcpu_mmap_size - size_of::<run::Run>())
             .file(&fd, 0)
             .done()?;
 
-        Ok(Arc::new(RwLock::new(Self { fd, run })))
+        Ok(Self { fd, run })
     }
 
     pub fn registers(&self) -> Result<arch::Registers> {

@@ -11,8 +11,8 @@ const CODE: &[u8] = &[
 #[test]
 fn test() {
     let kvm = Kvm::open().unwrap();
-    let vm = VirtualMachine::new(&kvm).unwrap();
-    let cpu = VirtualCpu::new(&vm).unwrap();
+    let mut vm = VirtualMachine::new(&kvm).unwrap();
+    let mut cpu = VirtualCpu::new(&vm).unwrap();
 
     // Create the code mapping.
     let mut code = util::map::Map::<()>::build(util::map::Access::Shared)
@@ -25,16 +25,16 @@ fn test() {
     code[..CODE.len()].copy_from_slice(CODE);
 
     // Add the mapping to the VM.
-    vm.write().unwrap().add_region(0, FlagSet::default(), 0x1000, code).unwrap();
+    vm.add_region(0, FlagSet::default(), 0x1000, code).unwrap();
 
     // Setup special registers.
-    let mut sregs = cpu.read().unwrap().special_registers().unwrap();
+    let mut sregs = cpu.special_registers().unwrap();
     sregs.cs.base = 0;
     sregs.cs.selector = 0;
-    cpu.write().unwrap().set_special_registers(sregs).unwrap();
+    cpu.set_special_registers(sregs).unwrap();
 
     // Setup registers.
-    cpu.write().unwrap().set_registers(arch::Registers {
+    cpu.set_registers(arch::Registers {
         rip: 0x1000,
         rax: 2,
         rbx: 2,
@@ -45,7 +45,7 @@ fn test() {
     let mut output = None;
 
     loop {
-        match cpu.write().unwrap().run().unwrap() {
+        match cpu.run().unwrap() {
             Reason::Halt => break,
 
             Reason::Io(io) => match io {

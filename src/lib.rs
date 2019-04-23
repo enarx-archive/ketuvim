@@ -7,18 +7,15 @@ mod kvm;
 mod vm;
 
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
 use std::os::raw::c_uint;
 
 use crate::util::{fd, map};
 
-pub struct Kvm {
-    fd: fd::Fd
-}
+pub struct Kvm(fd::Fd);
 
 pub struct VirtualMachine {
-    kvm: Arc<RwLock<Kvm>>,
     fd: fd::Fd,
+    vcpu_mmap_size: usize,
     multi_addr_space: c_uint,
     mem: HashMap<u16, Vec<map::Map<()>>>,
 }
