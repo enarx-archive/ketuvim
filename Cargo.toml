@@ -5,5 +5,10 @@ authors = ["Nathaniel McCallum <npmccallum@redhat.com>"]
 edition = "2018"
 
 [dependencies]
+sev = { git = "https://github.com/enarx/sev", features = ["openssl"] }
 bitflags = "1.0.4"
 libc = "0.2.53"
+
+[dev-dependencies]
+reqwest = "0.9.15"
+codicon = "2.1.0"

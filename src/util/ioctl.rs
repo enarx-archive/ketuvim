@@ -88,7 +88,6 @@ pub const KVM_SET_ONE_REG: c_ulong = 1074835116;
 pub const KVM_KVMCLOCK_CTRL: c_ulong = 44717;
 pub const KVM_GET_REG_LIST: c_ulong = 3221794480;
 pub const KVM_SMI: c_ulong = 44727;
-pub const KVM_MEMORY_ENCRYPT_OP: c_ulong = 3221794490;
 pub const KVM_MEMORY_ENCRYPT_REG_REGION: c_ulong = 2148576955;
 pub const KVM_MEMORY_ENCRYPT_UNREG_REGION: c_ulong = 2148576956;
 pub const KVM_HYPERV_EVENTFD: c_ulong = 1075359421;
