@@ -1,6 +1,8 @@
-use std::io::{Error, Result};
 use std::os::raw::{c_uint, c_ulong};
 use std::os::unix::io::*;
+use std::ptr::null;
+use std::fs::File;
+use std::io::*;
 
 pub struct Fd(RawFd);
 
@@ -9,8 +11,12 @@ impl Fd {
         Fd(fd.into_raw_fd())
     }
 
-    pub unsafe fn ioctl<T>(&self, request: c_ulong, arg: T) -> Result<c_uint> {
-        let r = libc::ioctl(self.0, request, arg, std::ptr::null::<u8>());
+    pub fn open(file: &str) -> Result<Self> {
+        Ok(Fd::new(File::open(file)?))
+    }
+
+    pub unsafe fn ioctl<T>(&self, req: impl Into<c_ulong>, data: T) -> Result<c_uint> {
+        let r = libc::ioctl(self.as_raw_fd(), req.into(), data, null::<u8>());
         if r < 0 { Err(Error::last_os_error())? }
         Ok(r as c_uint)
     }
