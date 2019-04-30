@@ -12,3 +12,7 @@ libc = "0.2.53"
 [dev-dependencies]
 reqwest = "0.9.15"
 codicon = "2.1.0"
+
+[patch.crates-io]
+openssl-sys = { git = 'https://github.com/sfackler/rust-openssl' }
+openssl = { git = 'https://github.com/sfackler/rust-openssl' }
