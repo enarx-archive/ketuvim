@@ -57,6 +57,7 @@ fn test() {
         .flags(map::Flags::ANONYMOUS)
         .extra(0x1000)
         .done().unwrap();
+    let addr = &*code as *const () as u64;
     vm.add_region(0, MemoryFlags::default(), 0x1000, code).unwrap();
 
     // Server takes a measurement and sends it to the client.
@@ -71,7 +72,8 @@ fn test() {
     let secret = session.secret(sev::launch::HeaderFlags::default(), CODE).unwrap();
 
     // Server injects the secret into the VM.
-    launch.inject(secret, 0x1000, 0x1000).unwrap();
+    let len = secret.ciphertext.len() as u32;
+    launch.inject(secret, addr, len).unwrap();
     let (_, vm) = launch.finish().unwrap();
 
     // Setup special registers.
