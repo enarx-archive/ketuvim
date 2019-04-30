@@ -69,9 +69,8 @@ impl<T> Launch<T> {
             code,
         };
 
-        let r = unsafe { self.vm.fd.ioctl(KVM_MEMORY_ENCRYPT_OP, &mut cmd)? };
-        match r {
-            0 => Ok(data),
+        match unsafe { self.vm.fd.ioctl(KVM_MEMORY_ENCRYPT_OP, &mut cmd) } {
+            Ok(_) => Ok(data),
             _ => Err(cmd.error.into()),
         }
     }
