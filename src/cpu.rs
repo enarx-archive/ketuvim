@@ -3,9 +3,9 @@ use super::*;
 use crate::util::fd::Fd;
 use crate::{arch, run};
 
+use std::mem::{size_of, size_of_val};
 use std::os::raw::{c_ulong, c_int};
 use std::os::unix::io::FromRawFd;
-use std::mem::size_of;
 use std::io::Result;
 
 impl VirtualCpu {
@@ -59,13 +59,11 @@ impl VirtualCpu {
 
         unsafe { self.fd.ioctl(KVM_RUN, 0)?; }
 
-        let run: &run::Run = self.run.as_ref();
-
-        Ok(match run.exit_reason {
+        Ok(match (*self.run).exit_reason {
             run::ReasonCode::Hlt => Reason::Halt,
 
             run::ReasonCode::Io => {
-                let io = unsafe { &run.reason.io };
+                let io = unsafe { &(*self.run).reason.io };
 
                 let port = io.port;
                 let size = io.size as usize;
@@ -87,6 +85,18 @@ impl VirtualCpu {
                     },
 
                     d => panic!("Unsupported direction: {:?}", d),
+                }
+            },
+
+            run::ReasonCode::Mmio => {
+                let mmio = unsafe { &(*self.run).reason.mmio };
+
+                assert!(mmio.len < size_of_val(&mmio.data) as u32);
+
+                Reason::Mmio {
+                    addr: mmio.phys_addr,
+                    data: &mmio.data[..mmio.len as usize],
+                    read: mmio.is_write == 0,
                 }
             },
 

@@ -45,5 +45,6 @@ pub enum ReasonIo<'a> {
 #[derive(Debug)]
 pub enum Reason<'a> {
     Halt,
-    Io(ReasonIo<'a>)
+    Io(ReasonIo<'a>),
+    Mmio { addr: u64, data: &'a [u8], read: bool },
 }

@@ -106,6 +106,8 @@ fn test() {
 
                 _ => panic!("Unexpected IO!"),
             },
+
+            r => panic!("Unsupported exit reason: {:?}", r),
         }
     }
 
