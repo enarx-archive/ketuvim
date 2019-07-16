@@ -1,7 +1,11 @@
-use ketuvim::{Kvm, VirtualMachine, VirtualCpu, MemoryFlags, Reason, ReasonIo, arch, util::map};
-use std::convert::TryFrom;
 use codicon::Decoder;
+use ketuvim::{
+    arch, util::map, Kvm, MemoryFlags, Reason, ReasonIo, VirtualCpu,
+    VirtualMachine,
+};
+use std::convert::TryFrom;
 
+#[rustfmt::skip]
 const CODE: &[u8] = &[
     0xba, 0xf8, 0x03, // mov $0x3f8, %dx
     0x00, 0xd8,       // add %bl, %al
@@ -11,23 +15,25 @@ const CODE: &[u8] = &[
 
 fn fetch_chain(fw: &sev::firmware::Firmware) -> sev::certs::Chain {
     const CEK_SVC: &str = "https://kdsintf.amd.com/cek/id";
-    const NAPLES: &str = "https://developer.amd.com/wp-content/resources/ask_ark_naples.cert";
+    const NAPLES: &str =
+        "https://developer.amd.com/wp-content/resources/ask_ark_naples.cert";
 
-    let mut chain = fw.pdh_cert_export()
+    let mut chain = fw
+        .pdh_cert_export()
         .expect("unable to export SEV certificates");
 
     let id = fw.get_identifer().expect("error fetching identifier");
     let url = format!("{}/{}", CEK_SVC, id);
 
-    let mut rsp = reqwest::get(&url)
-        .expect(&format!("unable to contact server"));
+    let mut rsp =
+        reqwest::get(&url).expect(&format!("unable to contact server"));
     assert!(rsp.status().is_success());
 
     chain.cek = sev::certs::sev::Certificate::decode(&mut rsp, ())
         .expect("Invalid CEK!");
 
-    let mut rsp = reqwest::get(NAPLES)
-        .expect(&format!("unable to contact server"));
+    let mut rsp =
+        reqwest::get(NAPLES).expect(&format!("unable to contact server"));
     assert!(rsp.status().is_success());
 
     sev::certs::Chain {
@@ -56,9 +62,11 @@ fn test() {
         .protection(map::Protection::READ | map::Protection::WRITE)
         .flags(map::Flags::ANONYMOUS)
         .extra(0x1000)
-        .done().unwrap();
+        .done()
+        .unwrap();
     let addr = &*code as *const () as u64;
-    vm.add_region(0, MemoryFlags::default(), 0x1000, code).unwrap();
+    vm.add_region(0, MemoryFlags::default(), 0x1000, code)
+        .unwrap();
 
     // Server takes a measurement and sends it to the client.
     let launch = ketuvim::sev::Launch::new(vm).unwrap();
@@ -69,7 +77,9 @@ fn test() {
     // Client verifies measurement and delivers secret to server.
     let session = session.measure().unwrap();
     let session = session.verify(build, measurement).unwrap();
-    let secret = session.secret(sev::launch::HeaderFlags::default(), CODE).unwrap();
+    let secret = session
+        .secret(sev::launch::HeaderFlags::default(), CODE)
+        .unwrap();
 
     // Server injects the secret into the VM.
     let len = secret.ciphertext.len() as u32;
@@ -90,7 +100,8 @@ fn test() {
         rbx: 2,
         rflags: 0x2,
         ..Default::default()
-    }).unwrap();
+    })
+    .unwrap();
 
     let mut output = None;
 

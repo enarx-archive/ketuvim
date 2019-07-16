@@ -1,9 +1,9 @@
 use super::*;
 use crate::util::map::Map;
 
+use std::io::{ErrorKind, Result};
 use std::os::raw::{c_int, c_uint, c_ulong};
 use std::os::unix::io::FromRawFd;
-use std::io::{ErrorKind, Result};
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -25,7 +25,8 @@ impl VirtualMachine {
         let (fd, limit, size) = unsafe {
             let fd = kvm.0.ioctl(KVM_CREATE_VM, 0 as c_ulong)?;
             let fd = fd::Fd::from_raw_fd(fd as c_int);
-            let lim = fd.ioctl(KVM_CHECK_EXTENSION, KVM_CAP_MULTI_ADDRESS_SPACE)?;
+            let lim =
+                fd.ioctl(KVM_CHECK_EXTENSION, KVM_CAP_MULTI_ADDRESS_SPACE)?;
             let size = kvm.0.ioctl(KVM_GET_VCPU_MMAP_SIZE, ())?;
             (fd, lim, size as usize)
         };
@@ -34,7 +35,7 @@ impl VirtualMachine {
             multi_addr_space: limit,
             vcpu_mmap_size: size,
             mem: HashMap::new(),
-            fd
+            fd,
         })
     }
 
@@ -43,7 +44,7 @@ impl VirtualMachine {
         space: u16,
         flags: MemoryFlags,
         addr: u64,
-        mut map: Map<T>
+        mut map: Map<T>,
     ) -> Result<u16> {
         const KVM_SET_USER_MEMORY_REGION: c_ulong = 1075883590;
 
@@ -62,7 +63,9 @@ impl VirtualMachine {
             userspace_addr: &mut *map as *mut T as u64,
         };
 
-        unsafe { self.fd.ioctl(KVM_SET_USER_MEMORY_REGION, &mut region)?; }
+        unsafe {
+            self.fd.ioctl(KVM_SET_USER_MEMORY_REGION, &mut region)?;
+        }
 
         maps.push(unsafe { map.cast() });
         Ok(slot as u16)

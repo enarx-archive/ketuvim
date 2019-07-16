@@ -3,10 +3,10 @@ use super::*;
 use crate::util::fd::Fd;
 use crate::{arch, run};
 
-use std::mem::{size_of, size_of_val};
-use std::os::raw::{c_ulong, c_int};
-use std::os::unix::io::FromRawFd;
 use std::io::Result;
+use std::mem::{size_of, size_of_val};
+use std::os::raw::{c_int, c_ulong};
+use std::os::unix::io::FromRawFd;
 
 impl VirtualCpu {
     pub fn new(vm: &VirtualMachine) -> Result<Self> {
@@ -28,14 +28,18 @@ impl VirtualCpu {
         const KVM_GET_REGS: c_ulong = 2156965505;
 
         let mut regs = arch::Registers::default();
-        unsafe { self.fd.ioctl(KVM_GET_REGS, &mut regs)?; }
+        unsafe {
+            self.fd.ioctl(KVM_GET_REGS, &mut regs)?;
+        }
         Ok(regs)
     }
 
     pub fn set_registers(&mut self, regs: arch::Registers) -> Result<()> {
         const KVM_SET_REGS: c_ulong = 1083223682;
 
-        unsafe { self.fd.ioctl(KVM_SET_REGS, &regs)?; }
+        unsafe {
+            self.fd.ioctl(KVM_SET_REGS, &regs)?;
+        }
         Ok(())
     }
 
@@ -43,21 +47,30 @@ impl VirtualCpu {
         const KVM_GET_SREGS: c_ulong = 2167975555;
 
         let mut regs = arch::SpecialRegisters::default();
-        unsafe { self.fd.ioctl(KVM_GET_SREGS, &mut regs)?; }
+        unsafe {
+            self.fd.ioctl(KVM_GET_SREGS, &mut regs)?;
+        }
         Ok(regs)
     }
 
-    pub fn set_special_registers(&mut self, regs: arch::SpecialRegisters) -> Result<()> {
+    pub fn set_special_registers(
+        &mut self,
+        regs: arch::SpecialRegisters,
+    ) -> Result<()> {
         const KVM_SET_SREGS: c_ulong = 1094233732;
 
-        unsafe { self.fd.ioctl(KVM_SET_SREGS, &regs)?; }
+        unsafe {
+            self.fd.ioctl(KVM_SET_SREGS, &regs)?;
+        }
         Ok(())
     }
 
     pub fn run<'b>(&'b mut self) -> Result<Reason<'b>> {
         const KVM_RUN: c_ulong = 44672;
 
-        unsafe { self.fd.ioctl(KVM_RUN, 0)?; }
+        unsafe {
+            self.fd.ioctl(KVM_RUN, 0)?;
+        }
 
         Ok(match (*self.run).exit_reason {
             run::ReasonCode::Hlt => Reason::Halt,
@@ -77,16 +90,16 @@ impl VirtualCpu {
                     run::IoDirection::In => {
                         let data = &mut self.run[start..][..size * count];
                         Reason::Io(ReasonIo::In { port, data })
-                    },
+                    }
 
                     run::IoDirection::Out => {
                         let data = &self.run[start..][..size * count];
                         Reason::Io(ReasonIo::Out { port, data })
-                    },
+                    }
 
                     d => panic!("Unsupported direction: {:?}", d),
                 }
-            },
+            }
 
             run::ReasonCode::Mmio => {
                 let mmio = unsafe { &(*self.run).reason.mmio };
@@ -98,7 +111,7 @@ impl VirtualCpu {
                     data: &mmio.data[..mmio.len as usize],
                     read: mmio.is_write == 0,
                 }
-            },
+            }
 
             r => panic!("Unsupported exit reason: {:?}", r),
         })

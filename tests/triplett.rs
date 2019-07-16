@@ -1,5 +1,6 @@
 use ketuvim::*;
 
+#[rustfmt::skip]
 const CODE: &[u8] = &[
     0xba, 0xf8, 0x03, // mov $0x3f8, %dx
     0x00, 0xd8,       // add %bl, %al
@@ -15,16 +16,20 @@ fn test() {
 
     // Create the code mapping.
     let mut code = util::map::Map::<()>::build(util::map::Access::Shared)
-        .protection(util::map::Protection::READ | util::map::Protection::WRITE)
+        .protection(
+            util::map::Protection::READ | util::map::Protection::WRITE,
+        )
         .flags(util::map::Flags::ANONYMOUS)
         .extra(0x1000)
-        .done().unwrap();
+        .done()
+        .unwrap();
 
     // Copy in the code.
     code[..CODE.len()].copy_from_slice(CODE);
 
     // Add the mapping to the VM.
-    vm.add_region(0, MemoryFlags::default(), 0x1000, code).unwrap();
+    vm.add_region(0, MemoryFlags::default(), 0x1000, code)
+        .unwrap();
 
     // Setup special registers.
     let mut sregs = cpu.special_registers().unwrap();
@@ -39,7 +44,8 @@ fn test() {
         rbx: 2,
         rflags: 0x2,
         ..Default::default()
-    }).unwrap();
+    })
+    .unwrap();
 
     let mut output = None;
 

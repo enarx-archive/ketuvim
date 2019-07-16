@@ -15,7 +15,7 @@ impl Kvm {
             12 => Ok(Self(fd)),
             v => Err(Error::new(
                 ErrorKind::InvalidData,
-                format!("invalid kvm version: {}", v)
+                format!("invalid kvm version: {}", v),
             ))?,
         }
     }

@@ -1,5 +1,5 @@
-use bitflags::bitflags;
 use crate::arch;
+use bitflags::bitflags;
 
 #[repr(C)]
 #[derive(Copy, Clone)]

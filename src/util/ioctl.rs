@@ -51,7 +51,6 @@ pub const KVM_SET_DEVICE_ATTR: c_ulong = 1075359457;
 pub const KVM_GET_DEVICE_ATTR: c_ulong = 1075359458;
 pub const KVM_HAS_DEVICE_ATTR: c_ulong = 1075359459;
 
-
 pub const KVM_TRANSLATE: c_ulong = 3222843013;
 pub const KVM_INTERRUPT: c_ulong = 1074048646;
 pub const KVM_GET_MSRS: c_ulong = 3221794440;
