@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::slice::{SliceIndex, from_raw_parts, from_raw_parts_mut};
-use std::ops::{Deref, DerefMut, Index, IndexMut};
-use std::os::unix::io::{AsRawFd, RawFd};
 use std::borrow::{Borrow, BorrowMut};
-use std::os::raw::{c_int, c_void};
-use std::marker::PhantomData;
 use std::io::{Error, Result};
+use std::marker::PhantomData;
 use std::mem::size_of;
+use std::ops::{Deref, DerefMut, Index, IndexMut};
+use std::os::raw::{c_int, c_void};
+use std::os::unix::io::{AsRawFd, RawFd};
+use std::slice::{from_raw_parts, from_raw_parts_mut, SliceIndex};
 
 use bitflags::bitflags;
 
@@ -195,7 +195,9 @@ impl<T: 'static + Copy> Builder<T> {
             )
         };
 
-        if ptr.is_null() { Err(Error::last_os_error())? }
+        if ptr.is_null() {
+            Err(Error::last_os_error())?
+        }
 
         Ok(Map(ptr as *mut T, length))
     }

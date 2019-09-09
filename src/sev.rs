@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::os::unix::io::AsRawFd;
-use std::mem::uninitialized;
 use std::mem::size_of_val;
+use std::mem::uninitialized;
 use std::os::raw::c_ulong;
+use std::os::unix::io::AsRawFd;
 
-use ::sev::{launch, firmware::{Indeterminate, Error}};
 use super::*;
+use ::sev::{
+    firmware::{Error, Indeterminate},
+    launch,
+};
 
 #[repr(u32)]
 #[allow(dead_code)]
@@ -93,7 +96,11 @@ impl<T> Launch<T> {
 impl Launch<Initialized> {
     pub fn new(vm: VirtualMachine) -> Result<Self> {
         let fw = fd::Fd::open("/dev/sev")?;
-        let l = Launch { state: Initialized, fw, vm };
+        let l = Launch {
+            state: Initialized,
+            fw,
+            vm,
+        };
         l.cmd(Code::Init, ())?;
         Ok(l)
     }
@@ -119,7 +126,11 @@ impl Launch<Initialized> {
         };
 
         let state = Started(Handle(self.cmd(Code::LaunchStart, data)?.handle));
-        Ok(Launch { state, fw: self.fw, vm: self.vm })
+        Ok(Launch {
+            state,
+            fw: self.fw,
+            vm: self.vm,
+        })
     }
 }
 
@@ -158,7 +169,7 @@ impl Launch<Started> {
         Ok(Launch {
             state: Measured(self.state.0, measurement),
             fw: self.fw,
-            vm: self.vm
+            vm: self.vm,
         })
     }
 }

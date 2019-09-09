@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::fs::File;
+use std::io::*;
 use std::os::raw::{c_uint, c_ulong};
 use std::os::unix::io::*;
 use std::ptr::null;
-use std::fs::File;
-use std::io::*;
 
 pub struct Fd(RawFd);
 
@@ -31,7 +31,9 @@ impl Fd {
 
     pub unsafe fn ioctl<T>(&self, req: impl Into<c_ulong>, data: T) -> Result<c_uint> {
         let r = libc::ioctl(self.as_raw_fd(), req.into(), data, null::<u8>());
-        if r < 0 { Err(Error::last_os_error())? }
+        if r < 0 {
+            Err(Error::last_os_error())?
+        }
         Ok(r as c_uint)
     }
 }

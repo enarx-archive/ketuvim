@@ -13,12 +13,12 @@
 // limitations under the License.
 
 pub mod arch;
-pub mod util;
 pub mod sev;
+pub mod util;
 
-mod run;
 mod cpu;
 mod kvm;
+mod run;
 mod vm;
 
 use std::collections::HashMap;
@@ -60,5 +60,9 @@ pub enum ReasonIo<'a> {
 pub enum Reason<'a> {
     Halt,
     Io(ReasonIo<'a>),
-    Mmio { addr: u64, data: &'a [u8], read: bool },
+    Mmio {
+        addr: u64,
+        data: &'a [u8],
+        read: bool,
+    },
 }
