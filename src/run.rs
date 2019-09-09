@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use bitflags::bitflags;
 use crate::arch;
+use bitflags::bitflags;
 
 #[repr(C)]
 #[derive(Copy, Clone)]
