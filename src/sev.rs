@@ -23,6 +23,9 @@ use ::sev::{
     launch,
 };
 
+/// Re-export of the `sev` crate to mitigate version conflicts in consumers
+pub use ::sev;
+
 #[repr(u32)]
 #[allow(dead_code)]
 #[derive(Copy, Clone)]
